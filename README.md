@@ -8,15 +8,15 @@
 
 ## II. Running slam_toolbox on the car
 
-Follow the instructions in class to run `slam_toolbox` to make a map of Levine second floor. Save the map as `levine_2nd.pgm` and `levine_2nd.yaml`.
+Follow the instructions provided in the *sim_instruction* pdf to run `slam_toolbox` to make a map of Gazebo's waffle map. Save the map as `waffle.pgm` and `waffle.yaml`.
 
 ## III. Localization with Particle Filter
 
-Follow the instructions in class to run `particle_filter` on the car using the new map you've made on Levine second floor.
+Follow the instructions to run `particle_filter` on the car using the Levine map.
 
 ## IV. Pure Pursuit Implementation
 
-We have provided a skeleton for the pure pursuit node. As per usual, test your algorithm first in the simulator before you test it on the car. When you're testing in the simulator, use the groud truth pose provided by the sim as the localization. When you move to the car, use particle filter to provide localization.
+We have provided a skeleton for the pure pursuit node. As per usual, test your algorithm first in the simulator before you test it on the car. When you're testing in the simulator, use the ground truth pose provided by the sim as the localization. When you move to the car, use particle filter to provide localization.
 
 As shown in the lecture, the curvature of the arc to track
 can be calculated as:
@@ -38,15 +38,17 @@ Usually, you'll just save the waypoints as `.csv` files with columns such as `[x
 
 To visualize the list of waypoints you have, and to visualize the current waypoint you're picking, you'll need to use the `visualization_msgs` messages and RViz. You can find some information [here](http://wiki.ros.org/rviz/DisplayTypes/Marker).
 
+There also exists interactive markers that allows students to manually edit waypoints in simulation. Consider looking into the documentation. 
+
 ## VII. Deliverables
 
-- **Deliverable 1**: Submit the map files (levine_2nd.pgm and levine_2nd.yaml) that you've made using `slam_toolbox`.
+- **Deliverable 1**: Submit the map files (waffle.pgm and waffle.yaml) that you've made using `slam_toolbox`.
 - **Deliverable 2**: Commit your pure pursuit package to GitHub. Your commited code should run smoothly in simulation.
-- **Deliverable 3**: Submit a link to a video on YouTube showing the real car following waypoints in Levine hallway. Show a screen recording of rviz. 
+
 
 ## VIII: Grading Rubric
 - Compilation: **10** Points
 - Running slam_toolbox and producing a map: **30** Points
 - Running particle_filter: **20** Points
-- Implementing pure pursuit: **30** Points
-- Video: **10** Points
+- Implementing pure pursuit: **40** Points
+

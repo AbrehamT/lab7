@@ -6,13 +6,13 @@
 - Localization with Particle Filter
 - Pure Pursuit Algorithm
 
-## II. Running slam_toolbox on the car
+## II. Running slam_toolbox in Simulator
 
 Follow the instructions provided in the *sim_instruction* pdf to run `slam_toolbox` to make a map of Gazebo's waffle map. Save the map as `waffle.pgm` and `waffle.yaml`.
 
-## III. Localization with Particle Filter
+## III. Localization with Particle Filter in Simulator
 
-Follow the instructions to run `particle_filter` on the car using the Levine map.
+Follow the instructions given in the pdf to run `particle_filter` in simulator using the Levine map.
 
 ## IV. Pure Pursuit Implementation
 
@@ -43,7 +43,11 @@ There also exists interactive markers that allows students to manually edit wayp
 ## VII. Deliverables
 
 - **Deliverable 1**: Submit the map files (waffle.pgm and waffle.yaml) that you've made using `slam_toolbox`.
-- **Deliverable 2**: Commit your pure pursuit package to GitHub. Your commited code should run smoothly in simulation.
+- **Deliverable 2**: Commit your pure pursuit package to GitHub. Your commited code should run smoothly in simulation. Students will be required to utilize a launch file to launch their 
+nodes for mapping and waypoint generation. 
+
+Share your git repository with your TA set as a collaborator. The TA will pull your repository to the car. Maps will be provided for physical tracks 
+through canvas. Students will recieve *'.pgm'* and *'.yaml'* files to add waypoints to.
 
 
 ## VIII: Grading Rubric

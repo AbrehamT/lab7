@@ -19,7 +19,7 @@ class OdometryTrackingNode(Node):
         self.steering_angle = 0.0
 
         # constants (might need to be adjusted)
-        self.wheelbase = 0.324  # wheelbase
+        self.wheelbase = 0.324 # length between front and rear axles in meters
 
         # subscribe to odometer and steering commands being sent
         self.create_subscription(Odometry, '/vesc/odom', self.odom_callback, 10)

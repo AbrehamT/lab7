@@ -52,7 +52,7 @@ ament_python_install_package(${PROJECT_NAME})
 
 # Install Python executables
 install(PROGRAMS
-  scripts/pure_pursuit_node.py
+  pure_pursuit/scripts/pure_pursuit_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

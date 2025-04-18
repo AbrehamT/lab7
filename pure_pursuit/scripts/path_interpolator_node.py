@@ -6,6 +6,7 @@ import numpy as np
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, PoseArray
 from std_msgs.msg import Header
+from scipy.interpolate import splprep, splev
 
 class PathInterpolator(Node):
     def __init__(self):
@@ -29,6 +30,25 @@ class PathInterpolator(Node):
         points = np.array([[pose.position.x, pose.position.y] for pose in msg.poses])
         self.get_logger().info(f"Received {len(points)} waypoints")
         self.interpolated_path = self.interpolate_linear(points, resolution=0.1)
+        self.interpolated_path = self.interpolate_spline(waypoints=points, num_points=500)
+
+
+    def interpolate_spline(self, waypoints, num_points=500):
+        if len(waypoints) < 2:
+            return []
+
+        # Transpose for splprep (expects list of x, y as separate arrays)
+        x = waypoints[:, 0]
+        y = waypoints[:, 1]
+
+        # Use splprep to fit a spline through the points
+        tck, _ = splprep([x, y], s=0, k=min(3, len(waypoints) - 1))
+
+        # Evaluate the spline at many evenly spaced parameter values
+        u_fine = np.linspace(0, 1, num_points)
+        x_interp, y_interp = splev(u_fine, tck)
+
+        return np.column_stack((x_interp, y_interp))
 
     def interpolate_linear(self, waypoints, resolution=0.1):
         if len(waypoints) < 2:

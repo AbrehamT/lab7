@@ -9,15 +9,17 @@ from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import PoseArray
 
 marker_poses = {}
-
 def print_quaternion(name, orientation):
+
     print(f"{name} orientation (quaternion): x={orientation.x}, y={orientation.y}, z={orientation.z}, w={orientation.w}")
 
 def publish_pose_array():
     pose_array_msg = PoseArray()
     pose_array_msg.header.frame_id = 'map'
     pose_array_msg.header.stamp = node.get_clock().now().to_msg()
-    pose_array_msg.poses = [pose for pose in marker_poses.values()]
+    # pose_array_msg.poses = [pose for pose in marker_poses.values()]
+    pose_array_msg.poses = [marker_poses[name] for name in sorted(marker_poses.keys())]
+
     pose_array_pub.publish(pose_array_msg)
 
 def processFeedback(feedback):
@@ -31,6 +33,8 @@ def processFeedback(feedback):
     marker_poses[feedback.marker_name] = feedback.pose
     print(f'{feedback.marker_name} moved to x={p.x}, y={p.y}, z={p.z}')
     print_quaternion(feedback.marker_name, o)
+    publish_pose_array()
+
 
 def create_movable_marker(x, y, server):
     # Create interactive marker
@@ -78,7 +82,9 @@ def create_movable_marker(x, y, server):
     # Insert the interactive marker into the server
     server.insert(int_marker, feedback_callback=processFeedback)
 
-if __name__ == '__main__':
+def main():
+    global pose_pub, pose_array_pub, node
+
     rclpy.init(args=sys.argv)
     node = rclpy.create_node('simple_marker')
 
@@ -103,3 +109,5 @@ if __name__ == '__main__':
     server.applyChanges()
     rclpy.spin(node)
     server.shutdown()
+if __name__ == '__main__':
+    main()

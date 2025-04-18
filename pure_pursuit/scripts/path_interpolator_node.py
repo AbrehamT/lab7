@@ -7,7 +7,6 @@ from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, PoseArray
 from std_msgs.msg import Header
 
-
 class PathInterpolator(Node):
     def __init__(self):
         super().__init__('path_interpolator')
@@ -15,16 +14,26 @@ class PathInterpolator(Node):
         self.publisher_ = self.create_publisher(Path, '/interpolated_path', 10)
         self.timer_ = self.create_timer(0.5, self.timer_callback)
 
-        self.waypoints = self.create_subscription(
+        # Subscriber handle
+        self.waypoints_sub = self.create_subscription(
             PoseArray,
             '/waypoint_array',
             self.waypoints_callback,
             10
         )
-        
-        self.interpolated_path = self.interpolate_linear(self.waypoints, resolution=0.1)
+
+        # Initialize path data
+        self.interpolated_path = []
+
+    def waypoints_callback(self, msg):
+        points = np.array([[pose.position.x, pose.position.y] for pose in msg.poses])
+        self.get_logger().info(f"Received {len(points)} waypoints")
+        self.interpolated_path = self.interpolate_linear(points, resolution=0.1)
 
     def interpolate_linear(self, waypoints, resolution=0.1):
+        if len(waypoints) < 2:
+            return []
+
         points = []
         for i in range(len(waypoints) - 1):
             p0, p1 = waypoints[i], waypoints[i + 1]
@@ -38,6 +47,9 @@ class PathInterpolator(Node):
         return np.array(points)
 
     def timer_callback(self):
+        if len(self.interpolated_path) == 0:
+            return  # No path yet
+
         path_msg = Path()
         path_msg.header = Header()
         path_msg.header.stamp = self.get_clock().now().to_msg()

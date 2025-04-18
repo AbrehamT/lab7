@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
+from nav_msgs.msg import Path
 
 import numpy as np
 from sensor_msgs.msg import LaserScan
@@ -16,8 +17,15 @@ class PurePursuit(Node):
         super().__init__('pure_pursuit_node')
         # TODO: create ROS subscribers and publishers
 
+        self.interpolated_path = self.create_subscription(
+            Path,
+            '/interpolated_path',
+            self.pose_callback,
+            10
+        )
+
     def pose_callback(self, pose_msg):
-        pass
+        self.get_logger().info(f"Interpolated path is: {pose_msg}")
         # TODO: find the current waypoint to track using methods mentioned in lecture
 
         # TODO: transform goal point to vehicle frame of reference

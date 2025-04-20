@@ -45,6 +45,7 @@ ament_target_dependencies(pure_pursuit_node
 # Install Cpp executables
 install(TARGETS
   pure_pursuit_node
+  scripts/odometry_tracking.py
   DESTINATION lib/${PROJECT_NAME})
 
 # Install Python modules
@@ -52,7 +53,7 @@ ament_python_install_package(${PROJECT_NAME})
 
 # Install Python executables
 install(PROGRAMS
-  scripts/pure_pursuit_node.py
+  pure_pursuit/scripts/pure_pursuit_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

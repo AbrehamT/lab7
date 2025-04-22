@@ -14,7 +14,7 @@ class PurePursuit(Node):
 
         # parameters
         self.declare_parameter('wheelbase', 0.3)             # meters
-        self.declare_parameter('lookahead_distance', 3.5)   # meters
+        self.declare_parameter('lookahead_distance', 1.25)   # meters
         self.declare_parameter('max_steering_angle', 0.4189)# radians (~24°)
         # self.declare_parameter('max_steering_angle', np.radians(50))# radians (~24°)
 

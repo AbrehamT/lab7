@@ -7,68 +7,66 @@ from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, PoseArray
 from std_msgs.msg import Header
 from scipy.interpolate import splprep, splev
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
 
 class PathInterpolator(Node):
     def __init__(self):
         super().__init__('path_interpolator')
 
-        self.publisher_ = self.create_publisher(Path, '/interpolated_path', 10)
-        self.timer_ = self.create_timer(0.5, self.timer_callback)
-
-        # Subscriber handle
-        self.waypoints_sub = self.create_subscription(
-            PoseArray,
-            '/waypoint_array',
-            self.waypoints_callback,
-            10
+        # QoS to match the latched /waypoint_poses topic
+        latched_qos = QoSProfile(
+            reliability=ReliabilityPolicy.RELIABLE,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL,
         )
 
-        # Initialize path data
+        # Subscribe to waypoints
+        self.waypoints_sub = self.create_subscription(
+            PoseArray,
+            '/waypoint_poses',
+            self.waypoints_callback,
+            latched_qos
+        )
+
+        # Publisher for interpolated path
+        self.publisher_ = self.create_publisher(Path, '/interpolated_path', 10)
+
+        # Timer to periodically publish path
+        self.timer_ = self.create_timer(0.5, self.timer_callback)
+
+        # Storage for interpolated path
         self.interpolated_path = []
+
+        self.get_logger().info('PathInterpolator node started.')
 
     def waypoints_callback(self, msg):
         points = np.array([[pose.position.x, pose.position.y] for pose in msg.poses])
         self.get_logger().info(f"Received {len(points)} waypoints")
-        self.interpolated_path = self.interpolate_linear(points, resolution=0.1)
-        self.interpolated_path = self.interpolate_spline(waypoints=points, num_points=500)
 
+        # Use spline interpolation
+        self.interpolated_path = self.interpolate_spline(points, num_points=1000)
 
     def interpolate_spline(self, waypoints, num_points=500):
         if len(waypoints) < 2:
+            self.get_logger().warn("Not enough waypoints to interpolate.")
             return []
 
-        # Transpose for splprep (expects list of x, y as separate arrays)
         x = waypoints[:, 0]
         y = waypoints[:, 1]
 
-        # Use splprep to fit a spline through the points
-        tck, _ = splprep([x, y], s=0, k=min(3, len(waypoints) - 1))
-
-        # Evaluate the spline at many evenly spaced parameter values
-        u_fine = np.linspace(0, 1, num_points)
-        x_interp, y_interp = splev(u_fine, tck)
-
-        return np.column_stack((x_interp, y_interp))
-
-    def interpolate_linear(self, waypoints, resolution=0.1):
-        if len(waypoints) < 2:
+        try:
+            tck, _ = splprep([x, y], s=0, k=min(3, len(waypoints) - 1))
+            u_fine = np.linspace(0, 1, num_points)
+            x_interp, y_interp = splev(u_fine, tck)
+            return np.column_stack((x_interp, y_interp))
+        except Exception as e:
+            self.get_logger().error(f"Spline interpolation failed: {e}")
             return []
-
-        points = []
-        for i in range(len(waypoints) - 1):
-            p0, p1 = waypoints[i], waypoints[i + 1]
-            dist = np.linalg.norm(p1 - p0)
-            steps = int(np.ceil(dist / resolution))
-            for j in range(steps):
-                t = j / steps
-                point = p0 + t * (p1 - p0)
-                points.append(point)
-        points.append(waypoints[-1])
-        return np.array(points)
 
     def timer_callback(self):
         if len(self.interpolated_path) == 0:
-            return  # No path yet
+            return
 
         path_msg = Path()
         path_msg.header = Header()
@@ -81,7 +79,7 @@ class PathInterpolator(Node):
             pose.pose.position.x = pt[0]
             pose.pose.position.y = pt[1]
             pose.pose.position.z = 0.0
-            pose.pose.orientation.w = 1.0
+            pose.pose.orientation.w = 1.0  # Facing forward
             path_msg.poses.append(pose)
 
         self.publisher_.publish(path_msg)
@@ -90,6 +88,13 @@ class PathInterpolator(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = PathInterpolator()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

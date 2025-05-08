@@ -19,7 +19,7 @@ class PurePursuit(Node):
         self.declare_parameter('wheelbase', 0.3)              # [m]
         self.declare_parameter('max_steering_angle', 0.4189) # [rad]
         self.declare_parameter('min_lookahead', 0.5)         # L_min [m]
-        self.declare_parameter('lookahead_gain', 0.75)        # k_v [m per (m/s)]
+        self.declare_parameter('lookahead_gain', 0.45)        # k_v [m per (m/s)]
 
         self.wheelbase = self.get_parameter('wheelbase').value
         self.max_delta = self.get_parameter('max_steering_angle').value
@@ -104,14 +104,14 @@ class PurePursuit(Node):
         # 7) publish drive command
         cmd = AckermannDriveStamped()
         cmd.drive.steering_angle = delta
-        cmd.drive.speed          = speed_cmd
+        cmd.drive.speed          = speed_cmd + 0.45
         self.drive_pub.publish(cmd)
 
     def find_goal(self, Ld):
         """Walk forward along path_pts until accumulating distance ≥ Ld."""
         cx, cy = self.current_x, self.current_y
         acc = 0.0
-        # find nearest index again, or you could cache it from above
+        # find nearest index again
         dists = [((px-cx)**2 + (py-cy)**2, i)
                  for i,(px,py) in enumerate(self.path_pts)]
         _, ni = min(dists, key=lambda t: t[0])
